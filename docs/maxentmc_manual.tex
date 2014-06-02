@@ -1,0 +1,181 @@
+\documentclass[12pt]{amsart}
+\usepackage{amsmath,amssymb,cite,fullpage}
+\usepackage[sc]{mathpazo}
+
+\numberwithin{equation}{section}
+
+\newcommand\BS{\boldsymbol}
+\newcommand\dif{\,\mathrm{d}}
+\newcommand\parderiv[2]{\frac{\partial #1}{\partial #2}}
+
+\begin{document}
+
+\title{MaxEntMC -- A maximum entropy algorithm with moment
+constraints}
+
+\author{Rafail V. Abramov}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+To be written.
+
+\section{Mathematical formulation of the maximum entropy problem
+with moment constraints}
+
+The content of this section is based on my paper titled {\em ``The
+  multidimensional maximum entropy moment problem: A review on
+  numerical methods''}, published in Commun. Math. Sci. Some parts of
+the section content below may be copied, with minor changes, from that
+work. For more details, please refer to that work and references
+therein.
+
+\subsection{Notations}
+
+Let $N$ be a positive integer number. Let $\mathbb R^N$ be an
+$N$-dimensional space of real numbers, and let $\mathbb Z^N$ be an
+$N$-dimensional space of nonnegative integer numbers. Let $\BS x$
+denote an element of $\mathbb R^N$, and let $\BS i$ denote an element
+of $\mathbb Z^N$. We define a {\em monomial} $\BS x^{\BS i}$ as
+%
+\begin{equation}
+\label{eq:monomial}
+\BS x^{\BS i}=x_1^{i_1}x_2^{i_2}\ldots x_N^{i_N}=\prod_{k=1}^N x_k^{i_k}.
+\end{equation}
+%
+We denote the {\em power} $|\BS i|$ of the monomial in
+\eqref{eq:monomial} as
+%
+\begin{equation}
+\label{eq:monomial_power}
+|\BS i|=i_1+i_2+\ldots+i_N=\sum_{k=1}^N i_k.
+\end{equation}
+%
+Let $U$ be a domain in $\mathbb R^N$. Let $\rho:U\to\mathbb R$ denote
+any nonnegative continuous function on $U$, with the condition that
+%
+\begin{equation}
+\int_U\rho(\BS x)\dif\BS x<\infty.
+\end{equation}
+%
+In this case, $\rho$ is called the {\em density}. Given an element
+$\BS i\in\mathbb Z^N$, we denote the corresponding {\em moment}
+$m_{\BS i}[\rho]$ as
+%
+\begin{equation}
+m_{\BS i}[\rho]=\int_U\BS x^{\BS i}\rho(\BS x)\dif\BS x.
+\end{equation}
+%
+Let $P$ be a finite subset of $\mathbb Z^N$. Let $\rho_{\BS
+  c}:U\to\mathbb R$ denote any $\rho$ for which all $m_{\BS i}$, such
+that $\BS i\in P$, are finite, and are given by a set of real numbers
+$c_{\BS i}\in\mathbb R$, for all $\BS i\in P$:
+%
+\begin{equation}
+m_{\BS i}[\rho_{\BS c}]=c_{\BS i},\qquad\forall \BS i\in P.
+\end{equation}
+%
+It is then said that $\rho_{\BS c}$ possesses a set of moments (or
+{\em moment constraints}, in the context of what is presented below)
+$\BS c$. There are two things which need to be emphasized:
+%
+\begin{enumerate}
+\item For an arbitrarily specified set of real numbers $\BS c$, the
+  corresponding density $\rho_{\BS c}$ does not have to exist (for
+  example, suppose that $\BS i$ includes only even integers, yet
+  $c_{\BS i}<0$);
+\item When $\rho_{\BS c}$ nonetheless exists, it does not have to be
+  unique.
+\end{enumerate}
+%
+What is presented below deals with the second situation.
+
+\subsection{Maximum entropy under moment constraints}
+
+We define the {\em Shannon entropy} $S[\rho]$ as
+%
+\begin{equation}
+\label{eq:entropy}
+S[\rho]=-\int_U\rho(\BS x)\ln\rho(\BS x)\dif\BS x.
+\end{equation}
+%
+Shannon entropy is recognized as a measure of uncertainty in
+probability densities. In the context of the maximum entropy problem,
+the goal is to find $\rho_{\BS c}^*$ among all $\rho_{\BS c}$, such
+that is maximizes $S$:
+%
+\begin{equation}
+\rho_{\BS c}^*=\arg\max_{\rho_{\BS c}}S[\rho_{\BS c}].
+\end{equation}
+%
+It can be shown via variational analysis that $\rho_{\BS c}^*$ belongs
+to the family of functions $f_{\BS\lambda}:U\to\mathbb R$, where
+$\BS\lambda=\{\lambda_{\BS i}\}$ are real numbers (called the {\em
+  Lagrange multipliers}), $\BS i\in P$. $f_{\BS\lambda}(\BS x)$ is
+explicitly given by
+%
+\begin{equation}
+f_{\BS\lambda}(\BS x)=\exp\left(\sum_{\BS i\in P}\lambda_{\BS i}\BS
+x^{\BS i}\right).
+\end{equation}
+%
+Depending on the sets $U$, $P$ and on the values $\BS\lambda$,
+$f_{\BS\lambda}(\BS x)$ may or may not be a density; indeed, observe
+that while any $f_{\BS\lambda}$ is certainly nonnegative, its integral
+over $U$ does not have to be finite. More precisely, any
+$f_{\BS\lambda}$ is a density over a finite domain $U$, but not all
+$f_{\BS\lambda}$ are densities when $U$ is not a finite domain.
+
+Our goal now is to find the set $\BS\lambda^*$ for which
+%
+\begin{equation}
+f_{\BS\lambda^*}(\BS x)=\rho_{\BS c}^*(\BS x), \qquad\forall\BS x\in
+U.
+\end{equation}
+%
+This is accomplished by computing the minimum of the {\em Lagrangian
+  function} (or shortly, the Lagrangian)
+%
+\begin{equation}
+\label{eq:lagrangian}
+L(\BS\lambda)=\int_U f_{\BS\lambda}(\BS x)\dif x-\sum_{\BS i\in
+  P}c_{\BS i}\lambda_{\BS i}.
+\end{equation}
+%
+The gradient (the vector of the first derivatives) and hessian (the
+matrix of the second derivatives) of the Lagrangian are given,
+respectively, via
+%
+\begin{subequations}
+\begin{equation}
+\parderiv L{\lambda_{\BS i}}=m_{\BS i}[f_{\BS\lambda}]-c_{\BS i},
+\end{equation}
+\begin{equation}
+\parderiv{^2 L}{\lambda_{\BS i}\partial\lambda_{\BS j}}=m_{\BS i+\BS
+  j}[f_{\BS\lambda}].
+\end{equation}
+\end{subequations}
+%
+From the above expressions, it is easy to see that the gradient of $L$
+is zero when the moment constraints are met (that is, a critial point
+of $L$ is found), and that the hessian of $L$ is positive definite,
+which means that the critical point is indeed a unique minimum. Note
+that, in general, the critial point does not have to exist.
+
+
+\section{How to specify constraints and Lagrange multipliers}
+
+To be written.
+
+\section{How to compute moments}
+
+To be written.
+
+\section{How to compute the gradient and hessian of the objective function}
+
+To be written.
+
+\end{document}
