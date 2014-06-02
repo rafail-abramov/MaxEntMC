@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="src/core/maxentmc_defs.h" open="0" top="0" tabpos="4">
-		<Cursor position="1197" topLine="0" />
+	<File name="src/core/maxentmc_defs.h" open="1" top="1" tabpos="7">
+		<Cursor position="1732" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_gradient_hessian.c" open="0" top="0" tabpos="5">
 		<Cursor position="1275" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_gradient_hessian.h" open="0" top="0" tabpos="3">
+	<File name="src/core/maxentmc_gradient_hessian.h" open="1" top="0" tabpos="1">
 		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_list.c" open="0" top="0" tabpos="7">
@@ -16,22 +16,22 @@
 	<File name="src/core/maxentmc_list.h" open="0" top="0" tabpos="4">
 		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_power.c" open="0" top="0" tabpos="5">
+	<File name="src/core/maxentmc_power.c" open="1" top="0" tabpos="3">
 		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_power.h" open="0" top="0" tabpos="2">
+	<File name="src/core/maxentmc_power.h" open="1" top="0" tabpos="6">
 		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_quad_helper.c" open="0" top="0" tabpos="1">
+	<File name="src/core/maxentmc_quad_helper.c" open="1" top="0" tabpos="5">
 		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_quad_helper.h" open="0" top="0" tabpos="1">
 		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_vector.c" open="0" top="0" tabpos="3">
+	<File name="src/core/maxentmc_vector.c" open="1" top="0" tabpos="4">
 		<Cursor position="1118" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_vector.h" open="0" top="0" tabpos="1">
+	<File name="src/core/maxentmc_vector.h" open="1" top="0" tabpos="2">
 		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/tests/main.c" open="0" top="0" tabpos="2">

@@ -15,14 +15,6 @@
 #ifndef MAXENTMC_DEFS_H_INCLUDED
 #define MAXENTMC_DEFS_H_INCLUDED
 
-typedef unsigned char maxentmc_index_t;
-
-#ifdef MAXENTMC_SINGLE_PRECISION
-typedef float maxentmc_float_t;
-#else
-typedef double maxentmc_float_t;
-#endif
-
 #include <stdlib.h>
 #include <errno.h>
 
@@ -31,29 +23,15 @@ typedef double maxentmc_float_t;
 #define MAXENTMC_CACHE_LINE_SIZE 64
 #endif
 
-#define MAXENTMC_FREAD(_pt_,_size_,_stream_)                \
-    if(fread((_pt_),1,(_size_),(_stream_)) != (_size_)){    \
-        MAXENTMC_MESSAGE(stderr,"stream read error");       \
-        return -1;                                          \
-    }
+#ifdef __AVX__
+#define MAXENTMC_FLOAT_ALIGNMENT 32
+#else
+#define MAXENTMC_FLOAT_ALIGNMENT 16
+#endif
 
-#define MAXENTMC_FREAD_PT(_pt_,_size_,_stream_)             \
-    if(fread((_pt_),1,(_size_),(_stream_)) != (_size_)){    \
-        MAXENTMC_MESSAGE(stderr,"stream read error");       \
-        return NULL;                                        \
-    }
+#define MAXENTMC_ALIGNED_SIZE(boundary,size)  ((size)+((boundary)-((size)%(boundary)))%(boundary))
 
-#define MAXENTMC_FWRITE(_pt_,_size_,_stream_)               \
-    if(fwrite((_pt_),1,(_size_),(_stream_)) != (_size_)){   \
-        MAXENTMC_MESSAGE(stderr,"stream write error");      \
-        return -1;                                          \
-    }
-
-#define MAXENTMC_FWRITE_PT(_pt_,_size_,_stream_)            \
-    if(fwrite((_pt_),1,(_size_),(_stream_)) != (_size_)){   \
-        MAXENTMC_MESSAGE(stderr,"stream write error");      \
-        return NULL;                                        \
-    }
+#define MAXENTMC_INCREMENT_POINTER(pt,offset) ((void *)(((char *)(pt))+(offset)))
 
 #define MAXENTMC_MESSAGE(stream,message)                \
 {                                                       \
@@ -94,14 +72,28 @@ switch((status)){                                                               
         MAXENTMC_MESSAGE(stderr,"error: unknown error in posix_memalign (?!?!?!)"); \
 }
 
-#define MAXENTMC_INCREMENT_POINTER(pt,offset) ((void *)(((char *)(pt))+(offset)))
+#define MAXENTMC_FREAD(_pt_,_size_,_stream_)                \
+    if(fread((_pt_),1,(_size_),(_stream_)) != (_size_)){    \
+        MAXENTMC_MESSAGE(stderr,"stream read error");       \
+        return -1;                                          \
+    }
 
-#ifdef __AVX__
-#define MAXENTMC_FLOAT_ALIGNMENT 32
-#else
-#define MAXENTMC_FLOAT_ALIGNMENT 16
-#endif
+#define MAXENTMC_FREAD_PT(_pt_,_size_,_stream_)             \
+    if(fread((_pt_),1,(_size_),(_stream_)) != (_size_)){    \
+        MAXENTMC_MESSAGE(stderr,"stream read error");       \
+        return NULL;                                        \
+    }
 
-#define MAXENTMC_ALIGNED_SIZE(boundary,size)  ((size)+((boundary)-((size)%(boundary)))%(boundary))
+#define MAXENTMC_FWRITE(_pt_,_size_,_stream_)               \
+    if(fwrite((_pt_),1,(_size_),(_stream_)) != (_size_)){   \
+        MAXENTMC_MESSAGE(stderr,"stream write error");      \
+        return -1;                                          \
+    }
+
+#define MAXENTMC_FWRITE_PT(_pt_,_size_,_stream_)            \
+    if(fwrite((_pt_),1,(_size_),(_stream_)) != (_size_)){   \
+        MAXENTMC_MESSAGE(stderr,"stream write error");      \
+        return NULL;                                        \
+    }
 
 #endif // MAXENTMC_DEFS_H_INCLUDED
