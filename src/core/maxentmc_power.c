@@ -1,5 +1,18 @@
+/** This file is part of MaxEntMC, a maximum entropy algorithm with moment constraints. **/
+/** Copyright (C) 2014 Rafail V. Abramov.                                               **/
+/**                                                                                     **/
+/** This program is free software: you can redistribute it and/or modify it under the   **/
+/** terms of the GNU General Public License as published by the Free Software           **/
+/** Foundation, either version 3 of the License, or (at your option) any later version. **/
+/**                                                                                     **/
+/** This program is distributed in the hope that it will be useful, but WITHOUT ANY     **/
+/** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A     **/
+/** PARTICULAR PURPOSE.  See the GNU General Public License for more details.           **/
+/**                                                                                     **/
+/** You should have received a copy of the GNU General Public License along with this   **/
+/** program.  If not, see <http://www.gnu.org/licenses/>.                               **/
+
 #include <string.h>
-#include <stdint.h>
 #include <netinet/in.h>
 #include "maxentmc_power.h"
 
@@ -372,8 +385,8 @@ struct maxentmc_power_struct * maxentmc_power_fread(FILE * const in)
 
     /** Now read properties, dimension and size **/
 
-    unsigned char properties;
-    MAXENTMC_FREAD_PT(&properties,sizeof(unsigned char),in);
+    uint8_t properties;
+    MAXENTMC_FREAD_PT(&properties,sizeof(uint8_t),in);
 
     maxentmc_index_t dimension;
     MAXENTMC_FREAD_PT(&dimension,sizeof(maxentmc_index_t),in);
@@ -411,7 +424,7 @@ int maxentmc_power_fwrite(struct maxentmc_power_struct const * const power, FILE
 
     MAXENTMC_FWRITE(MAXENTMC_POWER_STREAM_HEADER,MAXENTMC_POWER_STREAM_HEADER_SIZE,out);
 
-    MAXENTMC_FWRITE(&(power->properties),sizeof(unsigned char),out);
+    MAXENTMC_FWRITE(&(power->properties),sizeof(uint8_t),out);
 
     maxentmc_index_t const dimension = power->dimension;
     maxentmc_index_t const n_dimension = maxentmc_index_t_hton(dimension);

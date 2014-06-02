@@ -1,3 +1,17 @@
+/** This file is part of MaxEntMC, a maximum entropy algorithm with moment constraints. **/
+/** Copyright (C) 2014 Rafail V. Abramov.                                               **/
+/**                                                                                     **/
+/** This program is free software: you can redistribute it and/or modify it under the   **/
+/** terms of the GNU General Public License as published by the Free Software           **/
+/** Foundation, either version 3 of the License, or (at your option) any later version. **/
+/**                                                                                     **/
+/** This program is distributed in the hope that it will be useful, but WITHOUT ANY     **/
+/** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A     **/
+/** PARTICULAR PURPOSE.  See the GNU General Public License for more details.           **/
+/**                                                                                     **/
+/** You should have received a copy of the GNU General Public License along with this   **/
+/** program.  If not, see <http://www.gnu.org/licenses/>.                               **/
+
 #include <stdio.h>
 
 #include "test_list.h"
@@ -6,9 +20,8 @@
 #include "test_quad.h"
 #include "test_gradient_hessian.h"
 #include "test_maxentmc_simple.h"
-#include "test_convert_constraints.h"
 
-int main(int argc, char ** argv)
+int main(void)
 {
 /*
     maxentmc_list_t list = test_list();
@@ -27,17 +40,6 @@ int main(int argc, char ** argv)
 
     test_maxentmc_simple();
 
-/*
-    if(argc<3){
-        fputs("Not enough command line arguments\n",stderr);
-        return -1;
-    }
-
-    if(argc<4)
-        test_convert_constraints(argv[1],argv[2],NULL);
-    else
-        test_convert_constraints(argv[1],argv[2],argv[3]);
-*/
     return 0;
 
 }

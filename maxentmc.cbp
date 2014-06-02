@@ -70,13 +70,6 @@
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 		</Unit>
-		<Unit filename="src/tests/test_convert_constraints.c">
-			<Option compilerVar="CC" />
-			<Option target="Debug" />
-		</Unit>
-		<Unit filename="src/tests/test_convert_constraints.h">
-			<Option target="Debug" />
-		</Unit>
 		<Unit filename="src/tests/test_gradient_hessian.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
@@ -110,13 +103,6 @@
 			<Option target="Debug" />
 		</Unit>
 		<Unit filename="src/tests/test_quad_gauss_1D.h">
-			<Option target="Debug" />
-		</Unit>
-		<Unit filename="src/tests/test_read_old_data.c">
-			<Option compilerVar="CC" />
-			<Option target="Debug" />
-		</Unit>
-		<Unit filename="src/tests/test_read_old_data.h">
 			<Option target="Debug" />
 		</Unit>
 		<Unit filename="src/tests/test_vector.c">

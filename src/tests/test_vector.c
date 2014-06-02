@@ -1,3 +1,17 @@
+/** This file is part of MaxEntMC, a maximum entropy algorithm with moment constraints. **/
+/** Copyright (C) 2014 Rafail V. Abramov.                                               **/
+/**                                                                                     **/
+/** This program is free software: you can redistribute it and/or modify it under the   **/
+/** terms of the GNU General Public License as published by the Free Software           **/
+/** Foundation, either version 3 of the License, or (at your option) any later version. **/
+/**                                                                                     **/
+/** This program is distributed in the hope that it will be useful, but WITHOUT ANY     **/
+/** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A     **/
+/** PARTICULAR PURPOSE.  See the GNU General Public License for more details.           **/
+/**                                                                                     **/
+/** You should have received a copy of the GNU General Public License along with this   **/
+/** program.  If not, see <http://www.gnu.org/licenses/>.                               **/
+
 #include "test_vector.h"
 
 int test_vector(maxentmc_list_t const list)
@@ -20,23 +34,6 @@ int test_vector(maxentmc_list_t const list)
     maxentmc_power_vector_free(v);
     maxentmc_power_vector_free(v1);
     maxentmc_power_vector_free(v2);
-
-    /* maxentmc_power_print(A->powers,stdout);
-
-    maxentmc_power_t * pb = maxentmc_power_alloc_product(A->powers,A->powers);
-
-    maxentmc_power_print_product(pb,stdout);
-
-    maxentmc_matrix_t * B = maxentmc_matrix_alloc(pb,A->size1,0);
-
-    gsl_matrix_set_zero((gsl_matrix *)B);
-
-    maxentmc_matrix_power_multiply_add(A,A,B);
-
-    maxentmc_matrix_print(A,stdout);
-
-    maxentmc_matrix_print(B,stdout);
-    */
 
     return 0;
 

@@ -1,88 +1,91 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="src/core/maxentmc_defs.h" open="1" top="0" tabpos="4">
-		<Cursor position="1598" topLine="22" />
+	<File name="src/core/maxentmc_defs.h" open="0" top="0" tabpos="4">
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_gradient_hessian.c" open="0" top="0" tabpos="5">
-		<Cursor position="12295" topLine="87" />
+		<Cursor position="1275" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_gradient_hessian.h" open="0" top="0" tabpos="3">
-		<Cursor position="862" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_list.c" open="0" top="0" tabpos="7">
-		<Cursor position="7517" topLine="219" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_list.h" open="0" top="0" tabpos="4">
-		<Cursor position="409" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_power.c" open="1" top="0" tabpos="5">
-		<Cursor position="2108" topLine="81" />
+	<File name="src/core/maxentmc_power.c" open="0" top="0" tabpos="5">
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_power.h" open="0" top="0" tabpos="2">
-		<Cursor position="2254" topLine="6" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_quad_helper.c" open="0" top="0" tabpos="1">
-		<Cursor position="16402" topLine="489" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_quad_helper.h" open="0" top="0" tabpos="1">
-		<Cursor position="554" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/core/maxentmc_vector.c" open="1" top="0" tabpos="3">
-		<Cursor position="1609" topLine="311" />
+	<File name="src/core/maxentmc_vector.c" open="0" top="0" tabpos="3">
+		<Cursor position="1118" topLine="0" />
 	</File>
 	<File name="src/core/maxentmc_vector.h" open="0" top="0" tabpos="1">
-		<Cursor position="623" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/tests/main.c" open="1" top="1" tabpos="2">
-		<Cursor position="434" topLine="0" />
-	</File>
-	<File name="src/tests/test_convert_constraints.c" open="0" top="0" tabpos="0">
-		<Cursor position="2366" topLine="15" />
+	<File name="src/tests/main.c" open="0" top="0" tabpos="2">
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/tests/test_gradient_hessian.c" open="0" top="0" tabpos="10">
-		<Cursor position="1726" topLine="36" />
+		<Cursor position="1197" topLine="46" />
 	</File>
 	<File name="src/tests/test_gradient_hessian.h" open="0" top="0" tabpos="18">
-		<Cursor position="213" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/tests/test_list.c" open="0" top="0" tabpos="8">
-		<Cursor position="24" topLine="0" />
+		<Cursor position="1197" topLine="18" />
 	</File>
 	<File name="src/tests/test_list.h" open="0" top="0" tabpos="14">
-		<Cursor position="114" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
-	<File name="src/tests/test_maxentmc_simple.c" open="1" top="0" tabpos="1">
-		<Cursor position="0" topLine="0" />
+	<File name="src/tests/test_maxentmc_simple.c" open="0" top="0" tabpos="1">
+		<Cursor position="1197" topLine="39" />
 	</File>
 	<File name="src/tests/test_maxentmc_simple.h" open="0" top="0" tabpos="6">
-		<Cursor position="301" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/tests/test_quad.c" open="0" top="0" tabpos="12">
-		<Cursor position="5666" topLine="178" />
+		<Cursor position="1197" topLine="201" />
+	</File>
+	<File name="src/tests/test_quad.h" open="0" top="0" tabpos="0">
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/tests/test_quad_gauss_1D.c" open="0" top="0" tabpos="13">
-		<Cursor position="1273" topLine="12" />
+		<Cursor position="1197" topLine="27" />
 	</File>
-	<File name="src/tests/test_read_old_data.c" open="0" top="0" tabpos="14">
-		<Cursor position="2433" topLine="48" />
+	<File name="src/tests/test_quad_gauss_1D.h" open="0" top="0" tabpos="0">
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/tests/test_vector.c" open="0" top="0" tabpos="9">
-		<Cursor position="109" topLine="0" />
+		<Cursor position="1698" topLine="0" />
+	</File>
+	<File name="src/tests/test_vector.h" open="0" top="0" tabpos="0">
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/user/maxentmc.h" open="0" top="0" tabpos="2">
-		<Cursor position="1373" topLine="44" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/user/maxentmc_basic_algorithm.c" open="0" top="0" tabpos="5">
-		<Cursor position="8583" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/user/maxentmc_basic_algorithm.h" open="0" top="0" tabpos="4">
-		<Cursor position="109" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/user/maxentmc_quad_rectangle_uniform.c" open="0" top="0" tabpos="3">
-		<Cursor position="3432" topLine="44" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 	<File name="src/user/maxentmc_quad_rectangle_uniform.h" open="0" top="0" tabpos="0">
-		<Cursor position="470" topLine="0" />
+		<Cursor position="1197" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>
