@@ -21,10 +21,62 @@ constraints}
 
 \section{Introduction}
 
-To be written.
+The MaxEntMC is a maximum entropy algorithm with moment constraints,
+which can be adapted to computation of the maximum entropy problem
+with the user-defined set of moment constraints, user-defined
+quadrature (and, therefore, domain) on the $N$-dimensional Euclidean
+space (where $N$ is realistically no greater than 3 or 4 due to
+computational limitations on the numerical quadrature), via
+user-defined iterations of finding the critical point of the
+corresponding objective function (such as the Newton or quasi-Newton
+methods). In a certain sense, the MaxEntMC is a set of tools to
+produce an individually tailored maximum entropy algorithm for a given
+problem, although some simple examples of maximum entropy quadrature
+and iteration implementations are included with the code. The MaxEntMC
+provides the user with the following core tools for the maximum
+entropy computation:
+%
+\begin{enumerate}
+\item A set of data structures and routines to initialize, save and
+  load moment constraints and corresponding Lagrange multipliers of
+  arbitrary dimension and power;
+\item A set of quadrature helper routines to implement a parallel
+  (currently shared-memory multithreaded) numerical quadrature for
+  density moments over a set of user-specified abscissas and weights;
+\item A set of routines to transform the computed density moments into
+  the gradient vector and hessian matrix of the Lagrangian objective
+  function.
+\end{enumerate}
+%
+In addition, the MaxEntMC provides the user with the following 
+example routines for better illustration:
+%
+\begin{enumerate}
+\item A simple uniform quadrature routine over a user-specified
+  rectangular domain;
+\item A Newton method routine with a primitive inexact line search for
+  computation of the critical point of the objective Lagrangian
+  function.
+\end{enumerate}
+%
+It is, however, expected that the user will tailor the algorithm
+precisely to their particular maximum entropy problem by implementing
+their own quadrature and iteration methods.
+
+The manual is organized as follows. Section \ref{sec:math} presents a
+mathematical formulation of the maximum entropy problem with moment
+constraints. Section \ref{sec:constraints} documents the routines
+necessary for operations with moment constraints and Lagrange
+multipliers. Section \ref{sec:quadrature} documents the quadrature
+helper routines which are needed to set up the user-specified
+quadrature. Section \ref{sec:grad_hess} documents the routines which
+are used to extract the gradient and hessian of the Lagrangian
+function from the computed moments in a generic vector and matrix
+form.
 
 \section{Mathematical formulation of the maximum entropy problem
 with moment constraints}
+\label{sec:math}
 
 The content of this section is based on my paper titled {\em ``The
   multidimensional maximum entropy moment problem: A review on
@@ -165,16 +217,27 @@ of $L$ is found), and that the hessian of $L$ is positive definite,
 which means that the critical point is indeed a unique minimum. Note
 that, in general, the critial point does not have to exist.
 
+The optimal set of Lagrange multipliers $\BS\lambda$ can be found
+iteratively, using a plethora of standard methods such as the Newton
+method, or a variable metric quasi-Newton method (such as the BFGS
+algorithm). The Newton method requires the computation of the hessian,
+while the quasi-Newton methods use a ``finite difference'' secant
+approximation for the hessian from the set of gradients computed at
+different points along the optimization path. Either iteration method
+can be implemented with the MaxEntMC.
 
 \section{How to specify constraints and Lagrange multipliers}
+\label{sec:constraints}
 
 To be written.
 
 \section{How to compute moments}
+\label{sec:quadrature}
 
 To be written.
 
 \section{How to compute the gradient and hessian of the objective function}
+\label{sec:grad_hess}
 
 To be written.
 
