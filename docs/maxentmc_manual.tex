@@ -193,7 +193,7 @@ This is accomplished by computing the minimum of the {\em Lagrangian
 %
 \begin{equation}
 \label{eq:lagrangian}
-L(\BS\lambda)=\int_U f_{\BS\lambda}(\BS x)\dif x-\sum_{\BS i\in
+L(\BS\lambda)=m_{\BS 0}[f_{\BS\lambda}]-\sum_{\BS i\in
   P}c_{\BS i}\lambda_{\BS i}.
 \end{equation}
 %
@@ -226,17 +226,38 @@ approximation for the hessian from the set of gradients computed at
 different points along the optimization path. Either iteration method
 can be implemented with the MaxEntMC.
 
-\section{How to specify constraints and Lagrange multipliers}
+\section{How to use the MaxEntMC}
+
+Computation of the set of Lagrange multipliers $\BS\lambda$ from the
+set of constraints $\BS c$ can be split into the following tasks:
+%
+\begin{enumerate}
+\item Definition of constraints and Lagrange multipliers;
+\item Computation of moments from the Lagrange multipliers using the
+  numerical quadrature;
+\item Conversion of computed moments into the value of the Lagrangian
+  objective function, its gradient vector and hessian matrix;
+\item (Quasi-) Newton iterations over the set of Lagrange multipliers
+  until suitable tolerance is achieved.
+\end{enumerate}
+%
+By the design of the MaxEntMC, the last step is left to the
+user. Below we explain how to do other steps.
+
+\subsection{How to specify constraints and Lagrange multipliers}
 \label{sec:constraints}
 
 To be written.
+% Technically, each constraint is a
+%  real number attached to an element of the finite set
+%  $P\subset\mathbb Z^N$.
 
-\section{How to compute moments}
+\subsection{How to compute moments}
 \label{sec:quadrature}
 
 To be written.
 
-\section{How to compute the gradient and hessian of the objective function}
+\subsection{How to compute the gradient and hessian of the objective function}
 \label{sec:grad_hess}
 
 To be written.
