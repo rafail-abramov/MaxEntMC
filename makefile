@@ -23,8 +23,8 @@ CFLAGS_DEBUG = $(CFLAGS) -g
 RESINC_DEBUG = $(RESINC)
 RCFLAGS_DEBUG = $(RCFLAGS)
 LIBDIR_DEBUG = $(LIBDIR)
-LIB_DEBUG = $(LIB)-lgsl -lgslcblas -lnetcdf
-LDFLAGS_DEBUG = $(LDFLAGS) /usr/lib/liblapack.so.3gf
+LIB_DEBUG = $(LIB)-lgsl -lgslcblas
+LDFLAGS_DEBUG = $(LDFLAGS)
 OBJDIR_DEBUG = obj/Debug
 DEP_DEBUG = 
 OUT_DEBUG = bin/Debug/test_maxentmc
@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/libmaxentmc.so
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/src/tests/test_list.o $(OBJDIR_DEBUG)/src/user/maxentmc_quad_rectangle_uniform.o $(OBJDIR_DEBUG)/src/user/maxentmc_basic_algorithm.o $(OBJDIR_DEBUG)/src/tests/test_vector.o $(OBJDIR_DEBUG)/src/tests/test_quad_gauss_1D.o $(OBJDIR_DEBUG)/src/tests/test_quad.o $(OBJDIR_DEBUG)/src/tests/test_maxentmc_simple.o $(OBJDIR_DEBUG)/src/tests/test_gradient_hessian.o $(OBJDIR_DEBUG)/src/tests/main.o $(OBJDIR_DEBUG)/src/core/maxentmc_vector.o $(OBJDIR_DEBUG)/src/core/maxentmc_quad_helper.o $(OBJDIR_DEBUG)/src/core/maxentmc_power.o $(OBJDIR_DEBUG)/src/core/maxentmc_list.o $(OBJDIR_DEBUG)/src/core/maxentmc_gradient_hessian.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/src/user/maxentmc_quad_rectangle_uniform.o $(OBJDIR_DEBUG)/src/user/maxentmc_basic_algorithm.o $(OBJDIR_DEBUG)/src/tests/test_vector.o $(OBJDIR_DEBUG)/src/tests/test_quad_gauss_1D.o $(OBJDIR_DEBUG)/src/tests/test_quad.o $(OBJDIR_DEBUG)/src/tests/test_maxentmc_simple.o $(OBJDIR_DEBUG)/src/tests/test_list.o $(OBJDIR_DEBUG)/src/tests/test_gradient_hessian.o $(OBJDIR_DEBUG)/src/tests/main.o $(OBJDIR_DEBUG)/src/core/maxentmc_vector.o $(OBJDIR_DEBUG)/src/core/maxentmc_symmeig.o $(OBJDIR_DEBUG)/src/core/maxentmc_quad_helper.o $(OBJDIR_DEBUG)/src/core/maxentmc_power.o $(OBJDIR_DEBUG)/src/core/maxentmc_list.o $(OBJDIR_DEBUG)/src/core/maxentmc_gradient_hessian.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/src/core/maxentmc_vector.o $(OBJDIR_RELEASE)/src/core/maxentmc_quad_helper.o $(OBJDIR_RELEASE)/src/core/maxentmc_power.o $(OBJDIR_RELEASE)/src/core/maxentmc_list.o $(OBJDIR_RELEASE)/src/core/maxentmc_gradient_hessian.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/src/core/maxentmc_vector.o $(OBJDIR_RELEASE)/src/core/maxentmc_symmeig.o $(OBJDIR_RELEASE)/src/core/maxentmc_quad_helper.o $(OBJDIR_RELEASE)/src/core/maxentmc_power.o $(OBJDIR_RELEASE)/src/core/maxentmc_list.o $(OBJDIR_RELEASE)/src/core/maxentmc_gradient_hessian.o
 
 all: debug release
 
@@ -50,8 +50,8 @@ clean: clean_debug clean_release
 
 before_debug: 
 	test -d bin/Debug || mkdir -p bin/Debug
-	test -d $(OBJDIR_DEBUG)/src/tests || mkdir -p $(OBJDIR_DEBUG)/src/tests
 	test -d $(OBJDIR_DEBUG)/src/user || mkdir -p $(OBJDIR_DEBUG)/src/user
+	test -d $(OBJDIR_DEBUG)/src/tests || mkdir -p $(OBJDIR_DEBUG)/src/tests
 	test -d $(OBJDIR_DEBUG)/src/core || mkdir -p $(OBJDIR_DEBUG)/src/core
 
 after_debug: 
@@ -60,9 +60,6 @@ debug: before_debug out_debug after_debug
 
 out_debug: before_debug $(OBJ_DEBUG) $(DEP_DEBUG)
 	$(LD) $(LIBDIR_DEBUG) -o $(OUT_DEBUG) $(OBJ_DEBUG)  $(LDFLAGS_DEBUG) $(LIB_DEBUG)
-
-$(OBJDIR_DEBUG)/src/tests/test_list.o: src/tests/test_list.c
-	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/tests/test_list.c -o $(OBJDIR_DEBUG)/src/tests/test_list.o
 
 $(OBJDIR_DEBUG)/src/user/maxentmc_quad_rectangle_uniform.o: src/user/maxentmc_quad_rectangle_uniform.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/user/maxentmc_quad_rectangle_uniform.c -o $(OBJDIR_DEBUG)/src/user/maxentmc_quad_rectangle_uniform.o
@@ -82,6 +79,9 @@ $(OBJDIR_DEBUG)/src/tests/test_quad.o: src/tests/test_quad.c
 $(OBJDIR_DEBUG)/src/tests/test_maxentmc_simple.o: src/tests/test_maxentmc_simple.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/tests/test_maxentmc_simple.c -o $(OBJDIR_DEBUG)/src/tests/test_maxentmc_simple.o
 
+$(OBJDIR_DEBUG)/src/tests/test_list.o: src/tests/test_list.c
+	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/tests/test_list.c -o $(OBJDIR_DEBUG)/src/tests/test_list.o
+
 $(OBJDIR_DEBUG)/src/tests/test_gradient_hessian.o: src/tests/test_gradient_hessian.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/tests/test_gradient_hessian.c -o $(OBJDIR_DEBUG)/src/tests/test_gradient_hessian.o
 
@@ -90,6 +90,9 @@ $(OBJDIR_DEBUG)/src/tests/main.o: src/tests/main.c
 
 $(OBJDIR_DEBUG)/src/core/maxentmc_vector.o: src/core/maxentmc_vector.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/core/maxentmc_vector.c -o $(OBJDIR_DEBUG)/src/core/maxentmc_vector.o
+
+$(OBJDIR_DEBUG)/src/core/maxentmc_symmeig.o: src/core/maxentmc_symmeig.c
+	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/core/maxentmc_symmeig.c -o $(OBJDIR_DEBUG)/src/core/maxentmc_symmeig.o
 
 $(OBJDIR_DEBUG)/src/core/maxentmc_quad_helper.o: src/core/maxentmc_quad_helper.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/core/maxentmc_quad_helper.c -o $(OBJDIR_DEBUG)/src/core/maxentmc_quad_helper.o
@@ -106,8 +109,8 @@ $(OBJDIR_DEBUG)/src/core/maxentmc_gradient_hessian.o: src/core/maxentmc_gradient
 clean_debug: 
 	rm -f $(OBJ_DEBUG) $(OUT_DEBUG)
 	rm -rf bin/Debug
-	rm -rf $(OBJDIR_DEBUG)/src/tests
 	rm -rf $(OBJDIR_DEBUG)/src/user
+	rm -rf $(OBJDIR_DEBUG)/src/tests
 	rm -rf $(OBJDIR_DEBUG)/src/core
 
 before_release: 
@@ -123,6 +126,9 @@ out_release: before_release $(OBJ_RELEASE) $(DEP_RELEASE)
 
 $(OBJDIR_RELEASE)/src/core/maxentmc_vector.o: src/core/maxentmc_vector.c
 	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/core/maxentmc_vector.c -o $(OBJDIR_RELEASE)/src/core/maxentmc_vector.o
+
+$(OBJDIR_RELEASE)/src/core/maxentmc_symmeig.o: src/core/maxentmc_symmeig.c
+	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/core/maxentmc_symmeig.c -o $(OBJDIR_RELEASE)/src/core/maxentmc_symmeig.o
 
 $(OBJDIR_RELEASE)/src/core/maxentmc_quad_helper.o: src/core/maxentmc_quad_helper.c
 	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/core/maxentmc_quad_helper.c -o $(OBJDIR_RELEASE)/src/core/maxentmc_quad_helper.o

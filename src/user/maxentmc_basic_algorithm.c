@@ -65,6 +65,8 @@ int maxentmc_basic_algorithm(maxentmc_power_vector_t const constraints, size_t c
 
     maxentmc_quad_helper_t quad = maxentmc_quad_helper_alloc(dimension); /** This is quadrature helper structure **/
 
+    maxentmc_quad_helper_set_shift_rotation(quad,constraints); /** Automatic shift and rotation in quadrature (not necessary) **/
+
     maxentmc_LGH_t LGH = maxentmc_LGH_alloc(moments_grad); /** This is the object for computing the lagrangian, gradient and hessian from moments.
                                                          Allocated from any vector with constraint powers (gradient moments have suitable powers,
                                                          constraints vector could have been used too) **/

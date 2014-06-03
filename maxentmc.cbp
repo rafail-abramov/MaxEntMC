@@ -17,10 +17,8 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add option="/usr/lib/liblapack.so.3gf" />
 					<Add library="gsl" />
 					<Add library="gslcblas" />
-					<Add library="netcdf" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -62,6 +60,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/core/maxentmc_quad_helper.h" />
+		<Unit filename="src/core/maxentmc_symmeig.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/core/maxentmc_symmeig.h" />
 		<Unit filename="src/core/maxentmc_vector.c">
 			<Option compilerVar="CC" />
 		</Unit>

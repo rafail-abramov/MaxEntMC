@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <math.h>
 
+#include "maxentmc_symmeig.h"
 #include "maxentmc_quad_helper.h"
 
 #define LAPACK_ROW_MAJOR 101
@@ -240,52 +241,15 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
 
         /** Now need to compute the rotation **/
 
-        /** This is Fortran garbage **/
-
-        char const jobz = 'V';
-        char const uplo = 'U';
-        unsigned int const n = dim;
-        unsigned int const lda = dim;
-        int lwork = -1, info;
-
-#ifdef MAXENTMC_SINGLE_PRECISION
-        ssyev_(&jobz, &uplo, &n, NULL, &lda, NULL, mean, &lwork, &info);
-        if(info){
-            MAXENTMC_MESSAGE(stderr,"error: ssyev failed on query stage");
+        if(maxentmc_symmeig(dim,cov,dim,mean)){
+            MAXENTMC_MESSAGE(stderr,"failed to compute rotation");
             pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
             return -1;
         }
-#else
-        dsyev_(&jobz, &uplo, &n, NULL, &lda, NULL, mean, &lwork, &info);
-        if(info){
-            MAXENTMC_MESSAGE(stderr,"error: dsyev failed on query stage");
-            pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-            return -1;
-        }
-#endif
-
-        lwork = mean[0]+0.1;
-        maxentmc_float_t work[lwork];
-
-#ifdef MAXENTMC_SINGLE_PRECISION
-        ssyev_(&jobz, &uplo, &n, cov, &lda, mean, work, &lwork, &info);
-        if(info){
-            MAXENTMC_MESSAGE(stderr,"error: ssyev failed on computation stage");
-            pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-            return -1;
-        }
-#else
-        dsyev_(&jobz, &uplo, &n, cov, &lda, mean, work, &lwork, &info);
-        if(info){
-            MAXENTMC_MESSAGE(stderr,"error: dsyev failed on computation stage");
-            pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-            return -1;
-        }
-#endif
 
         /** DEBUG **/
 /*
-        puts("Quadrature eigenvalues and eigenvectors");
+        puts("Quadrature eigenvalues and eigenvectors (as rows)");
         for(i=0;i<dim;++i){
             printf("%g |",mean[i]);
             size_t j;
@@ -312,9 +276,8 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
             q->scale *= e_temp;
             size_t j;
             for(j=0;j<dim;++j)
-                q->rotate[j*dim+i] = cov[i*dim+j]*e_temp; /** Transposing on the fly because Fortran **/
+                q->rotate[i*dim+j] = cov[i*dim+j]*e_temp;
         }
-
         q->shift_rotate = 1;
 
     }
