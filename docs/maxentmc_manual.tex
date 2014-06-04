@@ -1,5 +1,5 @@
 \documentclass[12pt]{amsart}
-\usepackage{amsmath,amssymb,cite,fullpage,minted}
+\usepackage{amsmath,amssymb,cite,fullpage,enumerate,minted}
 \usepackage[sc]{mathpazo}
 
 \numberwithin{equation}{section}
@@ -21,20 +21,19 @@ constraints}
 
 \section{Introduction}
 
-The MaxEntMC is a maximum entropy algorithm with moment constraints,
-which can be adapted to computation of the maximum entropy problem
-with the user-defined set of moment constraints, user-defined
-quadrature (and, therefore, domain) on the $N$-dimensional Euclidean
-space (where $N$ is realistically no greater than 3 or 4 due to
-computational limitations on the numerical quadrature), via
-user-defined iterations of finding the critical point of the
-corresponding objective function (such as the Newton or quasi-Newton
-methods). In a certain sense, the MaxEntMC is a set of tools to
-produce an individually tailored maximum entropy algorithm for a given
-problem, although some simple examples of maximum entropy quadrature
-and iteration implementations are included with the code. The MaxEntMC
-provides the user with the following core tools for the maximum
-entropy computation:
+MaxEntMC is a maximum entropy algorithm with moment constraints, which
+can be adapted to computation of the maximum entropy problem with the
+user-defined set of moment constraints, user-defined quadrature (and,
+therefore, domain) on the $N$-dimensional Euclidean space (where $N$
+is realistically no greater than 3 or 4 due to computational
+limitations on the numerical quadrature), via user-defined iterations
+of finding the critical point of the corresponding objective function
+(such as the Newton or quasi-Newton methods). In a certain sense,
+MaxEntMC is a set of tools to produce an individually tailored maximum
+entropy algorithm for a given problem, although some simple examples
+of maximum entropy quadrature and iteration implementations are
+included with the code. The MaxEntMC provides the user with the
+following core tools for the maximum entropy computation:
 %
 \begin{enumerate}
 \item A set of data structures and routines to initialize, save and
@@ -48,7 +47,7 @@ entropy computation:
   function.
 \end{enumerate}
 %
-In addition, the MaxEntMC provides the user with the following 
+In addition, MaxEntMC provides the user with the following 
 example routines for better illustration:
 %
 \begin{enumerate}
@@ -224,9 +223,9 @@ algorithm). The Newton method requires the computation of the hessian,
 while the quasi-Newton methods use a ``finite difference'' secant
 approximation for the hessian from the set of gradients computed at
 different points along the optimization path. Either iteration method
-can be implemented with the MaxEntMC.
+can be implemented with MaxEntMC.
 
-\section{How to use the MaxEntMC}
+\section{How to use MaxEntMC}
 
 Computation of the set of Lagrange multipliers $\BS\lambda$ from the
 set of constraints $\BS c$ can be split into the following tasks:
@@ -241,10 +240,25 @@ set of constraints $\BS c$ can be split into the following tasks:
   until suitable tolerance is achieved.
 \end{enumerate}
 %
-By the design of the MaxEntMC, the last step is left to the
-user. Below we explain how to do other steps. All relevant data
-structures and routines, described below, are declared in
+By the design of MaxEntMC, the last step is left to the user. Below we
+explain how to do other steps. All relevant data structures and
+routines, described below, are declared in
 \texttt{src/user/maxentmc.h}.
+
+\subsection{Basic types defined by MaxEntMC}
+
+The two basic types defined by MaxEntMC are
+%
+\begin{enumerate}
+\item \texttt{maxentmc\_index\_t} -- this is the integer type to hold
+  the dimension of the problem and values of powers. It is currently
+  defined as \texttt{uint8\_t}, since it is highly unlikely that the
+  dimension or power of the maximum entropy problem can realistically
+  exceed 255.
+\item \texttt{maxentmc\_float\_t} -- this is the floating point type
+  used to hold real numbers in the algorithm. It is currently defined
+  as \texttt{double}.
+\end{enumerate}
 
 \subsection{How to specify constraints and Lagrange multipliers}
 \label{sec:constraints}
@@ -266,8 +280,242 @@ struct maxentmc_power_vector_struct {
 typedef struct maxentmc_power_vector_struct * maxentmc_power_vector_t;
   /* For convenience, the pointer to the structure is defined as a type */
 \end{minted}
+%
+Here, the values are contained \texttt{gsl\_vec}, which is a standard
+GSL vector structure (with all GSL routines applicable to it, except
+for allocation/freeing), and are directly accessible by dereferencing
+\texttt{gsl\_vec.data} pointer, which is of type
+\texttt{maxentmc\_float\_t}. On the other hand, \texttt{powers} is the
+pointer to the opaque structure which contains powers attached to each
+value contained in \texttt{gsl\_vec}.
 
-To be updated.
+\subsubsection{Operations with an existing power vector}
+
+When an object of type \texttt{maxentmc\_power\_vector\_t} is already
+allocated and initialized (more on this later), the following basic
+operations are provided for it:
+%
+\begin{enumerate}[1.]
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+void maxentmc_power_vector_free(maxentmc_power_vector_t v);
+/* Frees the power vector v */
+\end{minted}
+\item  \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+maxentmc_index_t maxentmc_power_vector_get_dimension
+                               (maxentmc_power_vector_t v);
+/* This function returns the dimension of the set of powers of the power
+   vector v. On error, zero is returned */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_get_max_power(maxentmc_power_vector_t v,
+                                        maxentmc_index_t * max_power);
+/* Writes the maximum power of the power vector v into max_power.
+   On error, -1 is returned, zero otherwise. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_find_element(maxentmc_power_vector_t v,
+                                       maxentmc_index_t p_1,
+                                       ...
+                                       maxentmc_index_t p_dim,
+                                       size_t * pos);
+/* Finds the position of the v->gsl_vec.data element corresponding to the
+   prescribed set of powers p$_1,\ldots,$p$_{\mathrm{dim}}$, and writes it to the memory
+   location pointed at by pos. Returns -1 on error, zero otherwise. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_find_element_ca(maxentmc_power_vector_t v,
+                                          maxentmc_index_t * p,
+                                          size_t * pos);
+/* The constant arity version of the previous function. The powers are
+   specified in p[0]$,\ldots,$p[dim-1]. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_get_powers(maxentmc_power_vector_t v, size_t pos,
+                                     maxentmc_index_t * p_1,
+                                     ...
+                                     maxentmc_index_t * p_dim);
+/* Writes the powers, corresponding to the element v->gsl_vec.data[pos],
+   into memory locations pointed at by p$_1,\ldots,$p$_{\mathrm{dim}}$. Returns -1 on error,
+   zero otherwise. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_get_powers_ca(maxentmc_power_vector_t v,
+                                        size_t pos, maxentmc_index_t * p);
+/* The constant arity version of the previous function. The powers are
+   written into p[0]$,\ldots,$p[dim-1]. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_compute_polynomial(maxentmc_power_vector_t v,
+                                             maxentmc_float_t x_1,
+                                             ...
+                                             maxentmc_float_t x_dim,
+                                             maxentmc_float_t * result);
+/* The values in v->gsl_vec.data are treated as coefficients of the
+   polynomial with corresponding powers, and the value of the polynomial
+   at the point x$_1,\ldots,$x$_{\mathrm{dim}}$ is written into the memory location pointed at
+   by result. Returns -1 on error, zero otherwise. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_compute_polynomial_ca(maxentmc_power_vector_t v,
+                                                maxentmc_float_t * x,
+                                                maxentmc_float_t * result);
+/* The constant arity version of the previous function. The point is
+   given by x[0]$,\ldots,$x[dim-1]. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_print(maxentmc_power_vector_t v, FILE * out);
+/* Prints the contents of v into the stream out. Returns -1 on error,
+   zero otherwise. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_fwrite_values(maxentmc_power_vector_t v,
+                                        FILE * out);
+/* Writes the contents of v->gsl_vec.data into the stream out with
+   host-to-network byte order conversion (currently, IEEE 754 floating
+   point format is assumed). Returns -1 on error, zero otherwise. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+int maxentmc_power_vector_fwrite_powers(maxentmc_power_vector_t v,
+                                        FILE * out);
+/* Writes the powers of v into the stream out with host-to-network byte
+   order conversion. Returns -1 on error, zero otherwise. */
+\end{minted}
+\end{enumerate}
+
+\subsubsection{Initialization of a power vector}
+
+A power vector can be allocated and initialized (filled with data) in
+the following ways:
+%
+\begin{enumerate}[1.]
+\item From an existing power vector. In this case, the new power
+  vector inherits the powers from the existing power vector. The
+  vector elements can then be initialized either by directly accessing
+  the elements of \texttt{gsl\_vec.data}, by reading previously saved
+  data from a stream, or by arithmetic operations with vectors
+  provided by GSL.
+\item As a product of two existing power vectors (this is needed for
+  the hessian computation). In this case, the new power vector obtains
+  its powers from the product of powers of the two existing power
+  vectors. The subsequent initialization of vector elements is same as
+  above.
+\item By reading the previously saved power structure from a stream.
+  The subsequent initialization of vector elements is same as above.
+\item From an object of the type \texttt{maxentmc\_list\_t}. This is
+  the most general, safe (and slow) way of initializing a power
+  vector.
+\end{enumerate}
+
+Below is the list of allocation and initialization functions.
+\begin{enumerate}[1.]
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+maxentmc_vector_t maxentmc_power_vector_alloc(maxentmc_power_vector_t v);
+/* Allocates a new vector, inheriting powers from v. The contents of
+   gsl_vec.data are uninitialized upon return. Returns NULL on error. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+maxentmc_vector_t maxentmc_power_vector_product_alloc
+                                          (maxentmc_power_vector_t v1,
+                                           maxentmc_power_vector_t v2);
+/* Allocates a new vector with powers computed as the product of those
+   of v1 and v2. The contents of gsl_vec.data are uninitialized upon
+   return. Returns NULL on error. */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+maxentmc_vector_t maxentmc_power_vector_fread_powers(FILE * in);
+/* Allocates a new vector, reading powers from the stream. The contents
+   of gsl_vec.data are uninitialized upon return. Returns NULL on error.
+   */
+\end{minted}
+\item \begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+maxentmc_vector_t maxentmc_power_vector_fread_values
+                               (maxentmc_power_vector_t v, FILE * in);
+/* For an existing vector, reads the values for v->gsl_vec.data from the
+   stream in. Returns -1 on error, zero otherwise. */
+\end{minted}
+\end{enumerate}
+
+Update here.
 
 \subsection{How to compute moments}
 \label{sec:quadrature}

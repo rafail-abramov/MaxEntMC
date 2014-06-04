@@ -112,7 +112,7 @@ maxentmc_index_t maxentmc_quad_helper_get_dimension(struct maxentmc_quad_helper_
     }
 }
 
-int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct * const q, struct maxentmc_power_vector_struct * const constraints)
+int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct * const q, struct maxentmc_power_vector_struct const * const constraints)
 {
     MAXENTMC_CHECK_NULL(q);
     if(q->armed){
