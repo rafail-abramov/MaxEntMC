@@ -1,5 +1,5 @@
 \documentclass[12pt]{amsart}
-\usepackage{amsmath,amssymb,cite,fullpage}
+\usepackage{amsmath,amssymb,cite,fullpage,minted}
 \usepackage[sc]{mathpazo}
 
 \numberwithin{equation}{section}
@@ -242,15 +242,32 @@ set of constraints $\BS c$ can be split into the following tasks:
 \end{enumerate}
 %
 By the design of the MaxEntMC, the last step is left to the
-user. Below we explain how to do other steps.
+user. Below we explain how to do other steps. All relevant data
+structures and routines, described below, are declared in
+\texttt{src/user/maxentmc.h}.
 
 \subsection{How to specify constraints and Lagrange multipliers}
 \label{sec:constraints}
 
-To be written.
-% Technically, each constraint is a
-%  real number attached to an element of the finite set
-%  $P\subset\mathbb Z^N$.
+The basic data type to hold a vector of real values with attached
+powers is given by
+%
+\begin{minted}[mathescape,
+               %linenos,
+               numbersep=5pt,
+               %gobble=2,
+               frame=lines,
+               framesep=2mm]{c}
+struct maxentmc_power_vector_struct {
+    gsl_vector gsl_vec;    /* This is the standard GSL vector */
+    struct maxentmc_power_struct * powers;   /* This is the pointer to the
+        opaque structure which holds powers for each element of gsl_vec */
+};
+typedef struct maxentmc_power_vector_struct * maxentmc_power_vector_t;
+  /* For convenience, the pointer to the structure is defined as a type */
+\end{minted}
+
+To be updated.
 
 \subsection{How to compute moments}
 \label{sec:quadrature}
