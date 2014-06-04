@@ -260,6 +260,26 @@ int maxentmc_power_get_power(struct maxentmc_power_struct const * const d, size_
     return 0;
 }
 
+static void maxentmc_power_init(struct maxentmc_power_struct * const d, size_t const size, maxentmc_index_t const dimension)
+{
+    /** Partition the space **/
+
+    d->properties = 0;
+    d->dimension = dimension;
+    d->max_power = 0;
+    d->num_refs = 0;
+    d->size = size;
+    pthread_mutex_init(&d->lock,NULL);
+    d->power = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_SUB_HEADER_SIZE);
+    d->max_power_per_dimension = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_HEADER_SIZE(size));
+    d->power[0] = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_MAX_POWER_SIZE(size,dimension));
+    size_t i;
+    for(i=1;i<size;++i)
+        d->power[i] = d->power[i-1]+dimension;
+    for(i=0;i<dimension;++i)
+        d->max_power_per_dimension[i] = 0;
+}
+
 struct maxentmc_power_struct * maxentmc_power_alloc(maxentmc_index_t const dimension, size_t const size)
 {
 
@@ -279,21 +299,8 @@ struct maxentmc_power_struct * maxentmc_power_alloc(maxentmc_index_t const dimen
     if(status)
         return NULL;
 
-    /** Partition the space **/
+    maxentmc_power_init(d,size,dimension);
 
-    d->properties = 0;
-    d->dimension = dimension;
-    d->max_power = 0;
-    d->num_refs = 0;
-    d->size = size;
-    d->power = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_SUB_HEADER_SIZE);
-    d->max_power_per_dimension = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_HEADER_SIZE(size));
-    d->power[0] = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_MAX_POWER_SIZE(size,dimension));
-    size_t i;
-    for(i=1;i<size;++i)
-        d->power[i] = d->power[i-1]+dimension;
-    for(i=0;i<dimension;++i)
-        d->max_power_per_dimension[i] = 0;
     d->product = NULL;
 
     /** done **/
@@ -302,13 +309,35 @@ struct maxentmc_power_struct * maxentmc_power_alloc(maxentmc_index_t const dimen
 
 }
 
+int maxentmc_power_inc_refs(struct maxentmc_power_struct * const d)
+{
+    MAXENTMC_CHECK_NULL(d);
+    pthread_mutex_lock(&d->lock);
+    ++(d->num_refs);
+    pthread_mutex_unlock(&d->lock);
+    return 0;
+}
+
 void maxentmc_power_free(struct maxentmc_power_struct * const d)
 {
     if(d){
-        if(d->num_refs > 1)
-            --(d->num_refs);
-        else
-            free(d);
+        pthread_mutex_lock(&d->lock);
+        switch(d->num_refs){
+            case 0: /** No vectors attached **/
+                pthread_mutex_unlock(&d->lock);
+                pthread_mutex_destroy(&d->lock);
+                free(d);
+                break;
+            case 1: /** One vector attached (the routine is called from it) **/
+                --(d->num_refs);
+                pthread_mutex_unlock(&d->lock);
+                pthread_mutex_destroy(&d->lock);
+                free(d);
+                break;
+            default: /** More than one vector attached, simply decrement refs count **/
+                --(d->num_refs);
+                pthread_mutex_unlock(&d->lock);
+        }
     }
 }
 
@@ -607,20 +636,7 @@ struct maxentmc_power_struct * maxentmc_power_alloc_product(struct maxentmc_powe
     if(status)
         return NULL;
 
-    /** Partition the space **/
-
-    d->properties = 0;
-    d->dimension = dimension;
-    d->max_power = 0;
-    d->num_refs = 0;
-    d->size = size;
-    d->power = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_SUB_HEADER_SIZE);
-    d->max_power_per_dimension = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_HEADER_SIZE(size));
-    d->power[0] = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_MAX_POWER_SIZE(size,dimension));
-    for(i=1;i<size;++i)
-        d->power[i] = d->power[i-1]+dimension;
-    for(i=0;i<dimension;++i)
-        d->max_power_per_dimension[i] = 0;
+    maxentmc_power_init(d,size,dimension);
 
     d->product = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_SIZE(size,dimension));
     d->product->p1 = (struct maxentmc_power_struct *)p1;

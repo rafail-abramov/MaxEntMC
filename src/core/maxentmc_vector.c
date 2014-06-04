@@ -173,7 +173,7 @@ struct maxentmc_power_vector_struct * maxentmc_power_vector_alloc_from_power(str
         free(d);
         return NULL;
     }
-    ++(d->powers->num_refs);
+    maxentmc_power_inc_refs(d->powers);
 
     return d;
 }

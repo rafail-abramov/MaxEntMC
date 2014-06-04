@@ -16,6 +16,7 @@
 #define MAXENTMC_POWER_H_INCLUDED
 
 #include <stdio.h>
+#include <pthread.h>
 #include "../user/maxentmc.h"
 #include "maxentmc_defs.h"
 
@@ -46,6 +47,7 @@ struct maxentmc_power_struct {
     uint8_t properties; /** Stores up to eight flags **/
     maxentmc_index_t dimension, max_power, num_refs; /** num_refs stores the number of references from vectors. When zero, the power is freed **/
     size_t size;
+    pthread_mutex_t lock;
     maxentmc_index_t * max_power_per_dimension; /** [dimension] **/
     maxentmc_index_t ** power; /** [size][dimension] **/
     struct maxentmc_product_struct * product;
@@ -59,6 +61,8 @@ int maxentmc_power_get_power(struct maxentmc_power_struct const * const d, size_
 struct maxentmc_power_struct * maxentmc_power_alloc(maxentmc_index_t const dimension, size_t const size);
 
 struct maxentmc_power_struct * maxentmc_power_alloc_product(struct maxentmc_power_struct const * const p1, struct maxentmc_power_struct const * const p2);
+
+int maxentmc_power_inc_refs(struct maxentmc_power_struct * const d);
 
 void maxentmc_power_free(struct maxentmc_power_struct * const); /** Decrements num_refs and uses free() to deallocate **/
 

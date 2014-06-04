@@ -25,26 +25,10 @@
 #define QUAD_MAX(a,b)  ((a)>(b))?(a):(b)
 
 #define MAXENTMC_QUAD_HELPER_HEADER_SIZE MAXENTMC_ALIGNED_SIZE(sizeof(maxentmc_float_t),sizeof(struct maxentmc_quad_helper_struct))
-
 #define MAXENTMC_QUAD_HELPER_SIZE(_s_) MAXENTMC_ALIGNED_SIZE(MAXENTMC_FLOAT_ALIGNMENT,MAXENTMC_QUAD_HELPER_HEADER_SIZE+sizeof(maxentmc_float_t)*(_s_)*((_s_)+1))
-
 #define MAXENTMC_QUAD_THREAD_HEADER_SIZE MAXENTMC_ALIGNED_SIZE(MAXENTMC_CACHE_LINE_SIZE,sizeof(struct maxentmc_quad_helper_thread_struct))
-
 #define MAXENTMC_QUAD_THREAD_MOMENT_SIZE(_s_) MAXENTMC_ALIGNED_SIZE(MAXENTMC_CACHE_LINE_SIZE,MAXENTMC_QUAD_THREAD_HEADER_SIZE+sizeof(maxentmc_float_t)*(_s_))
-
 #define MAXENTMC_QUAD_THREAD_FULL_SIZE(_s_) MAXENTMC_ALIGNED_SIZE(MAXENTMC_CACHE_LINE_SIZE,MAXENTMC_QUAD_THREAD_MOMENT_SIZE(_s_)+sizeof(maxentmc_float_t)*(_s_)*MAXENTMC_QUAD_THREAD_HOWMANY_AT_ONCE)
-
-static pthread_mutex_t maxentmc_quad_helper_global_lock = PTHREAD_MUTEX_INITIALIZER;
-
-#ifdef MAXENTMC_SINGLE_PRECISION
-void ssyev_(char const * const, char const * const, unsigned int const * const, maxentmc_float_t * const,
-            unsigned int const * const, maxentmc_float_t * const, maxentmc_float_t * const,
-            int const * const, int * const);
-#else
-void dsyev_(char const * const, char const * const, unsigned int const * const, maxentmc_float_t * const,
-            unsigned int const * const, maxentmc_float_t * const, maxentmc_float_t * const,
-            int const * const, int * const);
-#endif
 
 struct maxentmc_quad_helper_struct * maxentmc_quad_helper_alloc(maxentmc_index_t const dim)
 {
@@ -66,7 +50,7 @@ struct maxentmc_quad_helper_struct * maxentmc_quad_helper_alloc(maxentmc_index_t
 
     q->max_power = 0;
 
-    q->locked = 0;
+    q->armed = 0;
 
     q->n_mult = 0;
 
@@ -86,15 +70,16 @@ struct maxentmc_quad_helper_struct * maxentmc_quad_helper_alloc(maxentmc_index_t
 
     maxentmc_quad_helper_set_shift_rotation(q,NULL);
 
+    pthread_mutex_init(&q->lock,NULL);
+
     return q;
 }
 
 void maxentmc_quad_helper_free(struct maxentmc_quad_helper_struct * const q)
 {
     if(q){
-        pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-        if(q->locked){
-            MAXENTMC_MESSAGE(stderr,"error: quadrature helper is locked");
+        if(q->armed){
+            MAXENTMC_MESSAGE(stderr,"error: quadrature helper is armed");
         }
         else{
             struct maxentmc_quad_helper_power_list_struct * temp = q->multiplier_list;
@@ -111,9 +96,9 @@ void maxentmc_quad_helper_free(struct maxentmc_quad_helper_struct * const q)
                 temp = temp2->next;
                 free(temp2);
             }
+            pthread_mutex_destroy(&q->lock);
             free(q);
         }
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
     }
 }
 
@@ -130,10 +115,8 @@ maxentmc_index_t maxentmc_quad_helper_get_dimension(struct maxentmc_quad_helper_
 int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct * const q, struct maxentmc_power_vector_struct * const constraints)
 {
     MAXENTMC_CHECK_NULL(q);
-    pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-    if(q->locked){
-        MAXENTMC_MESSAGE(stderr,"error: quadrature helper is locked");
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
+    if(q->armed){
+        MAXENTMC_MESSAGE(stderr,"error: quadrature helper is armed");
         return -1;
     }
 
@@ -141,7 +124,6 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
 
         if(constraints->powers->dimension != q->dimension){
             MAXENTMC_MESSAGE(stderr,"error: dimensions of quadrature helper and constraints do not match");
-            pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
             return -1;
         }
 
@@ -211,7 +193,6 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
 
         if(c_d<dim*(dim+1)){
             MAXENTMC_MESSAGE(stderr,"warning: could not extract shift-rotation data");
-            pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
             return -1;
         }
 
@@ -243,7 +224,6 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
 
         if(maxentmc_symmeig(dim,cov,dim,mean)){
             MAXENTMC_MESSAGE(stderr,"failed to compute rotation");
-            pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
             return -1;
         }
 
@@ -266,7 +246,6 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
         for(i=0;i<dim;++i)
             if(mean[i]<=0){
                 MAXENTMC_MESSAGE(stderr,"error: an eigenvalue is not positive");
-                pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
                 return -1;
             }
 
@@ -290,8 +269,6 @@ int maxentmc_quad_helper_set_shift_rotation(struct maxentmc_quad_helper_struct *
         memset(q->rotate,0,sizeof(maxentmc_float_t)*dim*dim);
 
     }
-
-    pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
 
     return 0;
 }
@@ -349,16 +326,13 @@ int maxentmc_quad_helper_set_multipliers(struct maxentmc_quad_helper_struct * co
 {
     MAXENTMC_CHECK_NULL(q);
     MAXENTMC_CHECK_NULL(power_vector);
-    pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-    if(q->locked){
-        MAXENTMC_MESSAGE(stderr,"error: quadrature helper is locked");
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
+    if(q->armed){
+        MAXENTMC_MESSAGE(stderr,"error: quadrature helper is armed");
         return -1;
     }
 
     if(q->dimension != power_vector->powers->dimension){
         MAXENTMC_MESSAGE(stderr,"error: dimensions do not match");
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
         return -1;
     }
 
@@ -387,8 +361,6 @@ int maxentmc_quad_helper_set_multipliers(struct maxentmc_quad_helper_struct * co
             q->max_power = q->multipliers->powers->max_power;
     }
 
-    pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-
     return 0;
 
 
@@ -398,21 +370,24 @@ int maxentmc_quad_helper_set_moments(struct maxentmc_quad_helper_struct * const 
 {
     MAXENTMC_CHECK_NULL(q);
     MAXENTMC_CHECK_NULL(power_vector);
-    pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-    if(q->locked){
-        MAXENTMC_MESSAGE(stderr,"error: quadrature helper is locked");
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
+
+    pthread_mutex_lock(&q->lock);
+
+    if(q->armed){
+        pthread_mutex_unlock(&q->lock);
+        MAXENTMC_MESSAGE(stderr,"error: quadrature helper is armed");
         return -1;
     }
 
     if(q->dimension != power_vector->powers->dimension){
+        pthread_mutex_unlock(&q->lock);
         MAXENTMC_MESSAGE(stderr,"error: dimensions do not match");
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
         return -1;
     }
 
     struct maxentmc_power_vector_struct * temp_v = maxentmc_quad_helper_find_power_vector(q,power_vector,1);
     if(temp_v == NULL){
+        pthread_mutex_unlock(&q->lock);
         MAXENTMC_MESSAGE(stderr,"error: maxentmc_quad_helper_find_power_vector returned NULL for some reason");
         return -1;
     }
@@ -420,7 +395,7 @@ int maxentmc_quad_helper_set_moments(struct maxentmc_quad_helper_struct * const 
     memset(temp_v->gsl_vec.data, 0, sizeof(maxentmc_float_t)*temp_v->gsl_vec.size);
 
     q->moments = temp_v;
-    q->locked = 1;
+    q->armed = 1;
 
     if(q->moments && q->multipliers)
         q->max_power = QUAD_MAX(q->moments->powers->max_power,q->multipliers->powers->max_power);
@@ -430,7 +405,8 @@ int maxentmc_quad_helper_set_moments(struct maxentmc_quad_helper_struct * const 
         else
             q->max_power = q->multipliers->powers->max_power;
     }
-    pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
+
+    pthread_mutex_unlock(&q->lock);
 
     return 0;
 }
@@ -440,23 +416,18 @@ struct maxentmc_quad_helper_thread_struct * maxentmc_quad_helper_thread_alloc(st
 
     MAXENTMC_CHECK_NULL_PT(q);
 
-    pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-
     if(q->multipliers == NULL){
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
         MAXENTMC_MESSAGE(stderr,"error: multipliers is NULL");
         return NULL;
     }
 
     if(q->moments == NULL){
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
         MAXENTMC_MESSAGE(stderr,"error: moments is NULL");
         return NULL;
     }
 
-    if(!q->locked){
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-        MAXENTMC_MESSAGE(stderr,"error: quad helper not locked");
+    if(!q->armed){
+        MAXENTMC_MESSAGE(stderr,"error: quad helper not armed");
         return NULL;
     }
 
@@ -484,8 +455,6 @@ struct maxentmc_quad_helper_thread_struct * maxentmc_quad_helper_thread_alloc(st
     MAXENTMC_MESSAGE_VARARG(stdout,"n_mult = %u, n_mom = %u",q->n_mult,q->n_mom);
     */
     /** END DEBUG **/
-
-    pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
 
     return qt;
 }
@@ -840,10 +809,11 @@ int maxentmc_quad_helper_thread_merge(struct maxentmc_quad_helper_thread_struct 
 {
     MAXENTMC_CHECK_NULL(qt);
 
-    pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-    if(!qt->main_quadrature->locked){
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-        MAXENTMC_MESSAGE(stderr,"error: quad helper not locked");
+    pthread_mutex_lock(&qt->main_quadrature->lock);
+
+    if(!qt->main_quadrature->armed){
+        pthread_mutex_unlock(&qt->main_quadrature->lock);
+        MAXENTMC_MESSAGE(stderr,"error: quad helper not armed");
         return -1;
     }
 
@@ -852,9 +822,9 @@ int maxentmc_quad_helper_thread_merge(struct maxentmc_quad_helper_thread_struct 
     for(i=0;i<qt->main_quadrature->moments->gsl_vec.size;++i)
         qt->main_quadrature->moments->gsl_vec.data[i] += qt->moments[i];
 
-    pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-
     free(qt);
+
+    pthread_mutex_unlock(&qt->main_quadrature->lock);
 
     return 0;
 }
@@ -863,15 +833,17 @@ int maxentmc_quad_helper_get_moments(struct maxentmc_quad_helper_struct * const 
 {
     MAXENTMC_CHECK_NULL(q);
     MAXENTMC_CHECK_NULL(moments);
-    pthread_mutex_lock(&maxentmc_quad_helper_global_lock);
-    if(!q->locked){
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
-        MAXENTMC_MESSAGE(stderr,"error: quad helper not locked");
+
+    pthread_mutex_lock(&q->lock);
+
+    if(!q->armed){
+        pthread_mutex_unlock(&q->lock);
+        MAXENTMC_MESSAGE(stderr,"error: quad helper not armed");
         return -1;
     }
 
     if(q->moments->powers != moments->powers){
-        pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
+        pthread_mutex_unlock(&q->lock);
         MAXENTMC_MESSAGE(stderr,"error: powers do not match");
         return -1;
     }
@@ -884,9 +856,9 @@ int maxentmc_quad_helper_get_moments(struct maxentmc_quad_helper_struct * const 
     for(i=0;i<moments->gsl_vec.size;++i)
         moments->gsl_vec.data[i*stride] = q->moments->gsl_vec.data[i];
 
-    q->locked = 0;
+    q->armed = 0;
 
-    pthread_mutex_unlock(&maxentmc_quad_helper_global_lock);
+    pthread_mutex_unlock(&q->lock);
 
     return 0;
 }
