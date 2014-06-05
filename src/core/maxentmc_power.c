@@ -267,8 +267,8 @@ static void maxentmc_power_init(struct maxentmc_power_struct * const d, size_t c
     d->properties = 0;
     d->dimension = dimension;
     d->max_power = 0;
-    d->num_refs = 0;
     d->size = size;
+    d->num_refs = 0;
     pthread_mutex_init(&d->lock,NULL);
     d->power = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_SUB_HEADER_SIZE);
     d->max_power_per_dimension = MAXENTMC_INCREMENT_POINTER(d,MAXENTMC_POWER_HEADER_SIZE(size));
@@ -376,7 +376,7 @@ int maxentmc_power_print(struct maxentmc_power_struct const * const d, FILE * co
     MAXENTMC_CHECK_NULL(d);
     MAXENTMC_CHECK_NULL(out);
 
-    fprintf(out,"dimension = %u, size = %zu, max_power = %u, num_refs = %u,",d->dimension,d->size,d->max_power,d->num_refs);
+    fprintf(out,"dimension = %u, size = %zu, max_power = %u, num_refs = %zu,",d->dimension,d->size,d->max_power,d->num_refs);
 
     if(MAXENTMC_POWER_CHECK_PROPERTY(MAXENTMC_POWER_COMPLETE,d))
         fputs(" complete,",out);

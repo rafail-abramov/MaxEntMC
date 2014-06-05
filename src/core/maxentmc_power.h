@@ -44,9 +44,9 @@ struct maxentmc_product_struct;
 
 struct maxentmc_power_struct {
 
-    uint8_t properties; /** Stores up to eight flags **/
-    maxentmc_index_t dimension, max_power, num_refs; /** num_refs stores the number of references from vectors. When zero, the power is freed **/
-    size_t size;
+    uint16_t properties; /** Stores up to 16 flags **/
+    maxentmc_index_t dimension, max_power;
+    size_t size, num_refs; /** num_refs stores the number of references from vectors. When zero, the power is freed **/
     pthread_mutex_t lock;
     maxentmc_index_t * max_power_per_dimension; /** [dimension] **/
     maxentmc_index_t ** power; /** [size][dimension] **/
