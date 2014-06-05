@@ -93,28 +93,21 @@ int maxentmc_basic_algorithm(maxentmc_power_vector_t const constraints, size_t c
     int error_flag = 0; /** This is what is returned by this function. If non-zero, indicates error **/
     size_t num_iter=0; /** This is iteration counter **/
 
+    /** Compute the initial gradient **/
+
+    maxentmc_quad_helper_set_multipliers(quad,multipliers); /** Setting Lagrange multipliers for quadrature **/
+    maxentmc_quad_helper_set_moments(quad,moments_grad);    /** Setting the moments for quadrature **/
+    maxentmc_quadrature_rectangle_uniform_ca(quad, quad_size, quad_start, quad_end); /** Use rectangular uniform quadrature **/
+    maxentmc_quad_helper_get_moments(quad,moments_grad); /** Extract computed moments **/
+    maxentmc_LGH_compute_gradient(LGH,moments_grad,constraints,gradient); /** Compute the gradient vector from the moments **/
+
+    maxentmc_float_t gnorm;
+
     do{
 
         /** This is start of the iterations **/
 
-        /** First, compute the gradient and Hessian from the current set of Lagrange multipliers **/
-
-        maxentmc_quad_helper_set_multipliers(quad,multipliers); /** Setting Lagrange multipliers for quadrature **/
-        maxentmc_quad_helper_set_moments(quad,moments_hess);    /** Setting the moments for quadrature (currently hessian moments, since we will need the hessian at this stage **/
-        maxentmc_quadrature_rectangle_uniform_ca(quad, quad_size, quad_start, quad_end); /** Use rectangular uniform quadrature **/
-        maxentmc_quad_helper_get_moments(quad,moments_hess); /** Extract computed moments **/
-        maxentmc_LGH_compute_gradient(LGH,moments_hess,constraints,gradient); /** Compute the gradient vector from the moments **/
-        maxentmc_LGH_compute_hessian(LGH,moments_hess,hessian); /** Compute the hessian matrix from the same moments **/
-        maxentmc_float_t gnorm = gsl_blas_dnrm2(gradient);   /** Compute the square norm of the gradient (if small enough, the iterations will be stopped) **/
-
-        /** Diagnostic info (can be commented out) **/
-        maxentmc_LGH_compute_lagrangian(LGH,moments_hess,constraints,multipliers,&lagrangian);
-        printf("----------- Iteration %zu -----------\nValue of Lagrangian %g\n",++num_iter,lagrangian);
-        printf("Norm of gradient %g\n",gnorm);
-        gsl_matrix_memcpy(eigvec,hessian);
-        gsl_eigen_symm(eigvec,eigval,eigen_workspace);
-        printf("Hessian condition number %g\n",eigval->data[0]/eigval->data[size-1]);
-        /** End diagnostic info **/
+        gnorm = gsl_blas_dnrm2(gradient);   /** Compute the square norm of the gradient (if small enough, the iterations will be stopped) **/
 
         if(isnan(gnorm) || isinf(gnorm) || (gnorm<tolerance)){
             do_it = 0; /** The iterations are stopped **/
@@ -125,7 +118,24 @@ int maxentmc_basic_algorithm(maxentmc_power_vector_t const constraints, size_t c
 
             /** Do stepping here **/
 
-            /** First, determine the step through Cholesky decomposition **/
+            /** First, compute the gradient and Hessian from the current set of Lagrange multipliers **/
+
+            maxentmc_quad_helper_set_multipliers(quad,multipliers); /** Setting Lagrange multipliers for quadrature **/
+            maxentmc_quad_helper_set_moments(quad,moments_hess);    /** Setting the moments for quadrature (currently hessian moments, since we will need the hessian at this stage **/
+            maxentmc_quadrature_rectangle_uniform_ca(quad, quad_size, quad_start, quad_end); /** Use rectangular uniform quadrature **/
+            maxentmc_quad_helper_get_moments(quad,moments_hess); /** Extract computed moments **/
+            maxentmc_LGH_compute_hessian(LGH,moments_hess,hessian); /** Compute the hessian matrix from the same moments **/
+
+            /** Diagnostic info (can be commented out) **/
+            maxentmc_LGH_compute_lagrangian(LGH,moments_hess,constraints,multipliers,&lagrangian);
+            printf("----------- Iteration %zu -----------\nValue of Lagrangian %g\n",++num_iter,lagrangian);
+            printf("Norm of gradient %g\n",gnorm);
+            gsl_matrix_memcpy(eigvec,hessian);
+            gsl_eigen_symm(eigvec,eigval,eigen_workspace);
+            printf("Hessian condition number %g\n",eigval->data[0]/eigval->data[size-1]);
+            /** End diagnostic info **/
+
+            /** Now, determine the step through Cholesky decomposition **/
 
             if(gsl_linalg_cholesky_decomp(hessian)){
 
@@ -169,6 +179,7 @@ int maxentmc_basic_algorithm(maxentmc_power_vector_t const constraints, size_t c
                     else{
                         /** Line search successful, copy the temporary multipliers into the main multipliers **/
                         gsl_vector_memcpy(&multipliers->gsl_vec,&temp_multipliers->gsl_vec);
+                        gsl_vector_memcpy(gradient,temp_gradient);
                         do_line_search = 0;
                     }
 
@@ -190,6 +201,12 @@ int maxentmc_basic_algorithm(maxentmc_power_vector_t const constraints, size_t c
 
         /** Computations are successful, copy the computed multipliers into the constraint vector **/
         gsl_vector_memcpy(&constraints->gsl_vec,&multipliers->gsl_vec);
+
+        /** Diagnostic info (can be commented out) **/
+        maxentmc_LGH_compute_lagrangian(LGH,moments_hess,constraints,multipliers,&lagrangian);
+        printf("----------- Iteration %zu -----------\nValue of Lagrangian %g\n",++num_iter,lagrangian);
+        printf("Norm of gradient %g\n",gnorm);
+        /** End diagnostic info **/
 
     }
 
