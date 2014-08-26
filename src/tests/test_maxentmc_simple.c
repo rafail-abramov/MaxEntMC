@@ -13,7 +13,6 @@
 /** program.  If not, see <http://www.gnu.org/licenses/>.                               **/
 
 #include "test_maxentmc_simple.h"
-#include "test_read_old_data.h"
 
 #define MAXENTMC_DIM 2
 #define QUAD_AMP 5
