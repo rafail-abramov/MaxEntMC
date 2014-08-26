@@ -16,7 +16,6 @@
 #define TEST_MAXENTMC_SIMPLE_H_INCLUDED
 
 #include <string.h>
-#include <netcdf.h>
 #include <gsl/gsl_blas.h>
 #include "../user/maxentmc.h"
 #include "../user/maxentmc_quad_rectangle_uniform.h"
