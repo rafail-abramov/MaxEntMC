@@ -19,9 +19,6 @@
 #include "maxentmc_symmeig.h"
 #include "maxentmc_quad_helper.h"
 
-#define LAPACK_ROW_MAJOR 101
-#define LAPACK_COL_MAJOR 102
-
 #define QUAD_MAX(a,b)  ((a)>(b))?(a):(b)
 
 #define MAXENTMC_QUAD_HELPER_HEADER_SIZE MAXENTMC_ALIGNED_SIZE(sizeof(maxentmc_float_t),sizeof(struct maxentmc_quad_helper_struct))
